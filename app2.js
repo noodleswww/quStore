@@ -31,6 +31,7 @@ var walkPath = function (path) {
 };
 walkPath(rootPath);
 
+
 function upDown(){
     console.log(upArr.length);
     var obj = upArr.shift();
@@ -41,7 +42,13 @@ function upDown(){
         if (err) {
             console.log(err);
             logger.error(' upload file:' + obj.path + ',\nkey ' + obj.key + ',\nerr' + err);
-            upDown();
+            client.delete(obj.key, function (err) {
+                console.log('删除远程文件成功！，正在上传新文件...');
+                client.uploadFile(obj.path, {key : obj.key}, function (err, result) {
+                    console.log('修改成功！\n地址为：' + result.url);
+                    upDown();
+                });
+            });
         } else {
             console.log('ok');
             console.log(result.url);
