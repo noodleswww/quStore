@@ -2,41 +2,37 @@ var fs = require('fs');
 var path = require('path');
 var qn = require('qn');
 var logger = require('./logger');
+var config = require('./config');
 
-var client = qn.create({
-    accessKey : '5ZtczyWc3w1Tpb_4hrRowbAhQVG70wb6Btd6fmdt',
-    secretKey : 'hFS_bQKBYPGZsk-Th1MAHoVJiOtzdJiOTVfRMTAg',
-    bucket : 'homecdn',
-    domain : '7xk6xr.com1.z0.glb.clouddn.com'
-});
+var client = qn.create(config.qnAccess);
 
 
-var models_path = __dirname + '/static';
-var walk = function (path) {
+var rootPath = __dirname + '/static';
+var walkPath = function (path) {
     fs.readdirSync(path)
         .forEach(function (file) {
             var newPath = path + '/' + file;
             var stat = fs.statSync(newPath);
 
             if (stat.isFile()) {
-                if (/common|js|css/.test(path)) {
+                if (/js|css|common/.test(path)) {
                     if (/(.*)\.(js|coffee|css|png|jpg|jpeg|gif)/.test(file)) {
                         var start = newPath.indexOf('static/') + 7;
                         var key = newPath.substr(start);
-                        client.uploadFile(file, {key : key}, function (err, result) {
+                        client.uploadFile(newPath, {key : key}, function (err, result) {
                             if (err) {
-                                console.log(data.key);
-                                logger.error(' upload ', ' file ',data.file,data.key);
-                            }else{
+                                console.log(err);
+                                logger.error(' upload file:' + file + ',\nkey ' + key + ',\nerr' + err);
+                            } else {
                                 console.log('ok');
+                                console.log(result.url);
                             }
                         });
                     }
                 }
-            }
-            else if (stat.isDirectory()) {
-                walk(newPath);
+            } else if (stat.isDirectory()) {
+                walkPath(newPath);
             }
         });
 };
-walk(models_path);
+walkPath(rootPath);
