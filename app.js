@@ -7,6 +7,7 @@ var config = require('./config');
 var client = qn.create(config.qnAccess);
 
 
+
 var rootPath = __dirname + '/static';
 var walkPath = function (path) {
     fs.readdirSync(path)
